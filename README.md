@@ -15,6 +15,7 @@
 
 ## ***Features***
 - _Fast and Responsive_
+- _Generate URLs On the Go_
 - _Build with Dark Neon Design_
 - _Attach Parameters for Fixed Payment with UPI ID_
 - _Use for Anytime, Anywhere for Anyone_
@@ -23,7 +24,7 @@
 
 ### ***TODO***
 
-- [ ] Add Landing Page for Generate Links
+- [x] Add Landing Page for Generate Links
 - [ ] Add Custom Access to Land Page Only
 - [ ] Excrypt Params, So that Users can't Change
 
