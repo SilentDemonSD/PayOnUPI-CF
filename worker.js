@@ -10,9 +10,10 @@ function paymentHTML(qrImageUrl, upiId, upiLink, amount) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Payment</title>
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap" rel="stylesheet">
     <style>
       body {
-        font-family: 'Comic Sans MS', cursive;
+        font-family: "Balsamiq Sans", cursive;
         margin: 0;
         padding: 0;
         background: linear-gradient(135deg, #440a67, #330867, #200441);
@@ -55,6 +56,31 @@ function paymentHTML(qrImageUrl, upiId, upiLink, amount) {
         margin-top: 30px;
       }
 
+      #notFound {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: white;
+        background-color: red;
+        padding: 8px 25px;
+        margin-top: 30px;
+        border-radius: 3px;
+        text-align: center;
+        box-shadow: 0 0 5px red, 0 0 10px red, 0 0 20px red, 0 0 30px red;
+        animation: glow 1.5s infinite;
+      }
+
+      @keyframes glow {
+        0% {
+          box-shadow: 0 0 5px red, 0 0 10px red, 0 0 15px red, 0 0 20px red;
+        }
+        50% {
+          box-shadow: 0 0 10px red, 0 0 30px red, 0 0 40px red, 0 0 50px red;
+        }
+        100% {
+          box-shadow: 0 0 5px red, 0 0 10px red, 0 0 15px red, 0 0 20px red;
+        }
+      }
+
       #payButton a {
         color: #fff;
         text-decoration: none;
@@ -88,20 +114,25 @@ function paymentHTML(qrImageUrl, upiId, upiLink, amount) {
   <body>
     <div class="container">
       <h1>Pay On</h1>
-      <div class="upiId">UPI ID: ${upiId}</div>
-      <div class="upiId">Pay Amt: ${amount}</div>
+      ${upiId ? `<div class="upiId">UPI ID: ${upiId}</div>` : ''}
+      ${amount ? `<div class="upiId">Pay Amt: Rs. ${amount}</div>` : ''}
       <div id="qrCode">
         <img src="${qrImageUrl}" alt="QR Code" draggable="false">
       </div>
       <div id="payButton">
         <a href="${upiLink}" id="payLink">Click Here to Pay</a>
       </div>
+      ${upiId ? '' : `<div id="notFound">Not Found</div>`}
     </div>
     <script>
+      if (${upiId} === null || ${upiId} === "") {
+        document.getElementById('qrCode').style.display = 'none';
+        document.getElementById('payButton').style.display = 'none';
+      }
       history.replaceState({}, document.title, location.pathname);
     </script>
   </body>
-  </html>
+</html>
   `;
 }
 
@@ -112,9 +143,10 @@ function landingHTML() {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Generate Payment URL</title>
+    <link href="https://fonts.googleapis.com/css2?family=Balsamiq+Sans&display=swap" rel="stylesheet">
     <style>
       body {
-        font-family: 'Comic Sans MS', cursive;
+        font-family: "Balsamiq Sans", cursive;
         margin: 0;
         padding: 0;
         background: linear-gradient(135deg, #440a67, #330867, #200441);
@@ -159,6 +191,7 @@ function landingHTML() {
       }
   
       #generateButton button {
+        font-family: "Balsamiq Sans", cursive;
         color: #fff;
         text-decoration: none;
         border: none;
@@ -188,8 +221,10 @@ function landingHTML() {
       }
   
       #generatedURL {
-        text-align: center;
+        text-align: left;
         margin: 0;
+        background-color: rgba(0, 0, 0, 0.7);
+        color: #fff;
       }
   
       #copyButton {
@@ -212,48 +247,59 @@ function landingHTML() {
   <body>
     <div class="container">
       <h1>Generate Payment URL</h1>
-      <form id="generateForm">
+      <form onsubmit="return validateForm()" id="generateForm">
+        <label for="name">Name:</label>
+        <input type="text" id="name" name="name" placeholder="(Optional)">
         <label for="upiId">UPI ID:</label>
         <input type="text" id="upiId" name="upiId" required>
-        <label for="name">Name (optional):</label>
-        <input type="text" id="name" name="name" placeholder="Optional">
-        <label for="currency">Currency:</label>
-        <input type="text" id="currency" name="currency" value="INR" required>
         <label for="amount">Amount:</label>
-        <input type="number" id="amount" name="amount" required>
+        <input type="number" id="amount" name="amount" placeholder="(Optional)">
         <div id="generateButton">
-          <button type="button" onclick="generateURL()">Generate URL</button>
+          <button type="submit">Generate URL</button>
         </div>
       </form>
       <div id="generatedURLContainer">
-        <p id="generatedURL"></p>
+        <textarea class='text-box' rows="4" cols="32" id='generatedURL'></textarea>
         <button id="copyButton" onclick="copyURL()">&#x2398;</button>
       </div>
     </div>
     <script>
+      function validateForm() {
+        const upiId = document.getElementById('upiId').value;
+        const upiIdInput = document.getElementById('upiId');
+
+        if (upiId === "") {
+          return false;
+        } else {
+          generateURL();
+          return false;
+        }
+      }
+
       function generateURL() {
         const upiId = document.getElementById('upiId').value;
         const name = document.getElementById('name').value;
-        const currency = document.getElementById('currency').value;
         const amount = document.getElementById('amount').value;
         const url = new URL(window.location.href);
         url.pathname = '/pay';
         url.searchParams.set('pa', upiId);
         url.searchParams.set('pn', name);
-        url.searchParams.set('cu', currency);
-        url.searchParams.set('am', amount);
+        if (amount !== "") {
+          url.searchParams.set('am', amount);
+        }
         const generatedURL = url.toString();
         document.getElementById('generatedURL').textContent = generatedURL;
         document.getElementById('generatedURLContainer').style.display = 'block';
       }
   
       function copyURL() {
-        const generatedURL = document.getElementById('generatedURL').textContent;
-        navigator.clipboard.writeText(generatedURL).then(() => {
-          alert('URL copied to clipboard!');
-        }).catch(err => {
-          console.error('Failed to copy: ', err);
-        });
+        var generatedURL = document.getElementById("generatedURL");
+        navigator.clipboard.writeText(generatedURL.textContent).then(() => {
+          generatedURL.select().setSelectionRange(0, 99999)
+          document.execCommand("copy");
+          }).catch(err => {
+            console.error('Failed to copy: ', err);
+          });
       }
     </script>
   </body>
@@ -266,12 +312,14 @@ async function generateQR(request) {
   const upiId = params.get('pa');
   const name = params.get('pn');
   const amount = params.get('am');
-  const currency = params.get('cu');
 
-  const upiLink = `upi://pay?pa=${upiId}&pn=${name}&am=${amount}&cu=${currency}`;
+  var upiLink = `upi://pay?pa=${upiId}&pn=${name}&cu=INR`;
+  if (amount !== null && amount !== "") {
+    upiLink += `&am=${amount}`;
+  }
   const qrDataUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(upiLink)}&size=200x200`;
 
-  return { qrImageUrl: qrDataUrl, upiId: upiId, upiLink: upiLink, amount: `${currency} ${amount}`};
+  return { qrImageUrl: qrDataUrl, upiId: upiId, upiLink: upiLink, amount: amount};
 }
 
 async function handleRequest(request) {
